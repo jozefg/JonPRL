@@ -49,7 +49,7 @@ struct
        | Syntax.Malformed msg => "Syntax error: " ^ msg
        | _ => exnMessage E
 
-  fun loadFile (initialDevelopment, name) : Development.world =
+  fun loadFile (initialDevelopment, name) : (Development.world * Development.runProof) =
     let
       val instream = TextIO.openIn name
       val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)
@@ -62,12 +62,22 @@ struct
         StringVariableContext.new
           (Development.enumerateOperators initialDevelopment)
 
-      open CttDevelopmentParser
+      fun gatherProofs runProofs () =
+        List.app (fn f => f ()) runProofs
+          handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
+
+      fun eval ast =
+        let
+          val (D, runProofs) = DevelopmentAstEval.eval initialDevelopment ast
+        in
+          (D, gatherProofs runProofs)
+        end
+
+       open CttDevelopmentParser
     in
       (case CharParser.parseChars (parse initialContext) coordStream of
            Sum.INL e => raise Fail e
-         | Sum.INR (bindings, ast) =>
-           DevelopmentAstEval.eval initialDevelopment ast)
+         | Sum.INR (bindings, ast) => eval ast)
       handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
 end

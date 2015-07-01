@@ -1,6 +1,8 @@
 structure DevelopmentAstEval :
 sig
-  val eval : Development.world -> DevelopmentAst.t list -> Development.world
+  val eval : Development.world
+             -> DevelopmentAst.t list
+             -> (Development.world * Development.runProof list)
 end =
 struct
   open DevelopmentAst
@@ -28,12 +30,5 @@ struct
         (Development.defineOperator D {definiendum = pat, definiens = term},
          pending)
 
-  fun eval D decls =
-    let
-      val (D', runProofs) =
-          List.foldl (fn (decl, info) => eval_decl info decl) (D, []) decls
-      val () = List.app (fn f => f ()) (List.rev runProofs)
-    in
-      D'
-    end
+  fun eval D = List.foldl (fn (decl, info) => eval_decl info decl) (D, [])
 end

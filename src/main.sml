@@ -49,19 +49,26 @@ struct
       val (opts, files) = List.partition (String.isPrefix "--") args
       val mode = getMode opts
 
-      fun loadFile (f, dev) = CttFrontend.loadFile (dev, f)
-      val oworld = SOME (foldl loadFile Development.empty files) handle _ => NONE
+      fun loadFile (f, (dev, pending)) =
+        case CttFrontend.loadFile (dev, f) of
+            (dev', f) => (dev', f :: pending)
+      fun runAllProofs pending =
+        (List.app (fn f => f ()) (List.rev pending); 0)
+          handle _ => 1
+
+      val oworld =
+          SOME (foldl loadFile (Development.empty, []) files) handle _ => NONE
     in
       case oworld of
            NONE => 1
-         | SOME world =>
+         | SOME (world, pending) =>
              (case mode of
-                   CHECK_DEVELOPMENT => 0
+                   CHECK_DEVELOPMENT => runAllProofs pending
                  | PRINT_DEVELOPMENT =>
-                   (CttFrontend.printDevelopment world; 0)
+                   (CttFrontend.printDevelopment world; runAllProofs pending)
                  | LIST_OPERATORS =>
-                   (CttFrontend.printOperators world; 0)
+                   (CttFrontend.printOperators world; runAllProofs pending)
                  | LIST_TACTICS =>
-                     (app (fn tac => print (tac ^ "\n")) listOfTactics; 0))
+                     (app (fn tac => print (tac ^ "\n")) listOfTactics; runAllProofs pending))
     end
 end

@@ -4,7 +4,7 @@ sig
 end =
 struct
   open DevelopmentAst
-  fun eval_decl D ast =
+  fun eval_decl (D, pending) ast =
     case ast of
         THEOREM (lbl, term, tac) =>
         let
@@ -13,17 +13,27 @@ struct
               case vars of
                   [] => ()
                 | _ => raise Context.Open term
+          val (f, D') =
+              Development.prove D (lbl,
+                                   Sequent.>> (Sequent.Context.empty, term),
+                                   TacticEval.eval D tac)
         in
-          Development.prove D (lbl,
-                               Sequent.>> (Sequent.Context.empty, term),
-                               TacticEval.eval D tac)
+            (D', f :: pending)
         end
       | OPERATOR (lbl, arity) =>
-        Development.declareOperator D (lbl, arity)
+        (Development.declareOperator D (lbl, arity), pending)
       | TACTIC (lbl, tac) =>
-        Development.defineTactic D (lbl, TacticEval.eval D tac)
+        (Development.defineTactic D (lbl, TacticEval.eval D tac), pending)
       | DEFINITION (pat, term) =>
-        Development.defineOperator D {definiendum = pat, definiens = term}
+        (Development.defineOperator D {definiendum = pat, definiens = term},
+         pending)
 
-  fun eval D = List.foldl (fn (decl, D) => eval_decl D decl) D
+  fun eval D decls =
+    let
+      val (D', runProofs) =
+          List.foldl (fn (decl, info) => eval_decl info decl) (D, []) decls
+      val () = List.app (fn f => f ()) runProofs
+    in
+      D'
+    end
 end

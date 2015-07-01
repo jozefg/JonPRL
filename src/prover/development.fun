@@ -93,16 +93,24 @@ struct
 
   val empty = Telescope.empty
 
+  type runProof = unit -> unit
   fun prove T (lbl, goal, tac) =
     let
-      val (subgoals, validation) = tac goal
+      fun mkEvidence () =
+        let
+          val (subgoals, validation) = tac goal
+        in
+          case subgoals of
+              [] => validation []
+            | _ => raise Fail "Subgoals not discharged"
+        end
+      val evidence = Susp.delay mkEvidence
     in
-      case subgoals of
-           [] => Telescope.snoc T (lbl, Object.THEOREM
-                  {statement = goal,
-                   script = tac,
-                   evidence = Susp.delay (fn _ => validation [])})
-         | _ => raise Fail "Subgoals not discharged"
+      (fn _ => (Susp.force evidence; ()),
+       Telescope.snoc T (lbl, Object.THEOREM
+         {statement = goal,
+          script = tac,
+          evidence = evidence}))
     end
 
   fun defineTactic T (lbl, tac) =

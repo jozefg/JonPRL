@@ -44,7 +44,8 @@ sig
   val empty : world
 
   (* extend a development with a theorem *)
-  val prove : world -> label * judgement * tactic -> world
+  type runProof = unit -> unit
+  val prove : world -> label * judgement * tactic -> (runProof * world)
 
   (* extend a development with a custom tactic *)
   val defineTactic : world -> label * tactic -> world

@@ -65,10 +65,13 @@ struct
              (case mode of
                    CHECK_DEVELOPMENT => runAllProofs pending
                  | PRINT_DEVELOPMENT =>
-                   (CttFrontend.printDevelopment world; runAllProofs pending)
+                   if runAllProofs pending = 0 then
+                       (CttFrontend.printDevelopment world; 0)
+                   else
+                       1
                  | LIST_OPERATORS =>
                    (CttFrontend.printOperators world; runAllProofs pending)
                  | LIST_TACTICS =>
-                     (app (fn tac => print (tac ^ "\n")) listOfTactics; runAllProofs pending))
+                   (app (fn tac => print (tac ^ "\n")) listOfTactics; runAllProofs pending))
     end
 end

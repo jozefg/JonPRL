@@ -1,0 +1,4 @@
+Operator foo : ().
+Theorem obvious1 : [unit] {id}.
+Operator bar : ().
+Theorem obvious2 : [unit] {auto}.

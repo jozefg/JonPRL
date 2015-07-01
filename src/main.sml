@@ -53,11 +53,13 @@ struct
         case CttFrontend.loadFile (dev, f) of
             (dev', f) => (dev', f :: pending)
       fun runAllProofs pending =
-        (List.app (fn f => f ()) (List.rev pending); 0)
+        (List.app (fn f => f ()) pending; 0)
           handle _ => 1
-
       val oworld =
           SOME (foldl loadFile (Development.empty, []) files) handle _ => NONE
+      val oworld =
+          Option.map
+              (fn (world, runProofs) => (world, List.rev runProofs)) oworld
     in
       case oworld of
            NONE => 1

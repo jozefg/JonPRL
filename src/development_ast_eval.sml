@@ -32,7 +32,7 @@ struct
     let
       val (D', runProofs) =
           List.foldl (fn (decl, info) => eval_decl info decl) (D, []) decls
-      val () = List.app (fn f => f ()) runProofs
+      val () = List.app (fn f => f ()) (List.rev runProofs)
     in
       D'
     end

@@ -30,5 +30,11 @@ struct
         (Development.defineOperator D {definiendum = pat, definiens = term},
          pending)
 
-  fun eval D = List.foldl (fn (decl, info) => eval_decl info decl) (D, [])
+  fun eval D decls =
+    let
+      val (D', pending) =
+          List.foldl (fn (decl, info) => eval_decl info decl) (D, []) decls
+    in
+      (D', List.rev pending)
+    end
 end

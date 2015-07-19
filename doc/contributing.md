@@ -78,11 +78,32 @@ use `out` to get a view of it. The view is defined as
 
 ``` sml
     datatype view =
-        ` of var
+        ` of Variable.t
       | $ of Operator.t * t Vector.vector
       | \ of Variable.t * t
 ```
 
+A view of a term (or any AST created in this way) is either one of
+three cases,
+
+ 1. A variable
+ 2. The application of an operator to a vector of subterms (this is
+    a node in a traditional AST)
+ 3. A binding site `\`. This says that we've bound some variable in
+    this term.
+
+The variable given with `\` is guaranteed to be globally unique so we
+don't have to deal with scoping issues. However, the internal
+representation avoids using *all* globally unique identifiers so
+it's not super inefficient.
+
+We further use an utility module to get `subst`, `subst1`, and several
+other convenient operators across terms for free. You should read the
+signatures in sml-abt for a full listing.
+
+The term and development AST are much simpler since they don't have to
+deal with binding. For these we have a normal ML data type. The only
+other thing to speak of right now
 
 ### Parser
 ### Prover

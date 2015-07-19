@@ -127,8 +127,68 @@ facing, for example:
  - Fix parsing for terms
 
 ### Parser
+
+TODO
+
 ### Prover
+
+TODO
+
 ### Gluing it all together
+
+JonPRL has relatively few "glue" modules built on top of
+everything. There are only 4. Two of them are "eval" modules. They
+take the ASTs for tactics and developments and translate them into the
+appropriate notions for use in the `prover` section. For example, in
+`development_ast_eval.sml` there is one exported function
+
+``` sml
+    val eval : Development.world -> DevelopmentAst.t list -> Development.world
+```
+
+So we take the current world of the development and a list of ASTs,
+one for each top level declaration. If we encounter a `THEOREM` in
+that list we do something like the following
+
+``` sml
+    (* D is the current world *)
+    THEOREM (lbl, term, tac) =>
+    let
+      val vars = Syntax.freeVariables term
+      val () =
+          case vars of
+              [] => ()
+            | _ => raise Context.Open term
+    in
+      Development.prove D (lbl,
+                           Sequent.>> (Sequent.Context.empty, term),
+                           TacticEval.eval D tac)
+    end
+```
+
+So in this case we check that the `term` (represents what we're trying
+to prove) has no free variables and then call
+`Development.prove`. Since we need to supply a "real tactic" (not an
+AST representing one) we need to convert `tac : Tactic.t` into a
+tactic as described by `CTT.tactic`. To do this we use
+`tactic_eval.sml` which behaves similarly to the code we're looking
+at. It's just a matter of mapping an AST into the appropriate function
+defined in `prover/ctt.fun`.
+
+In both of these evaluation files almost no computation occurs but
+they will always need to be modified if you change something in their
+respective ASTs, for example
+
+ - Adding a new tactic
+ - Renaming components of the development AST
+
+The other two files are `ctt_frontend.sml` and `main.sml`. These are
+really the top level files of JonPRL and are specifically the bits
+that deal with reading the command line arguments, reading the
+appropriate files, and kicking off the whole process. `main.sml` is
+exclusively focused on parsing the command line arguments, you should
+only ever touch this file if you're modifying how the `jonprl`
+executable behaves.
 
 [manual]: http://www.smlnj.org/doc/CM/new.pdf
 [abt]: http://www.github.com/jonsterling/sml-abt

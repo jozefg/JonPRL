@@ -101,9 +101,30 @@ We further use an utility module to get `subst`, `subst1`, and several
 other convenient operators across terms for free. You should read the
 signatures in sml-abt for a full listing.
 
-The term and development AST are much simpler since they don't have to
-deal with binding. For these we have a normal ML data type. The only
-other thing to speak of right now
+Aside from these three main data types, there are a few more
+structures in `syntax/` to be aware of.
+
+ - `level.sml`
+
+    This is how JonPRL works with levels for
+    universes. It provides all the basic operations you would expect
+    (`succ`/`pred`/...) as well as some equation solving features. The
+    docs in `level.sig` should be helpful for understanding that.
+
+ - `pattern.fun`
+
+    Similarly to how we have `operator.sml`, we have something similar
+    for handling operator definitions in JonPRL. This is really just a
+    simple ABT with one operator (representing the only form operator
+    definitions can have)
+
+That about wraps up the context of the syntax folder. You should worry
+about touching this folder if you ever modify anything directly user
+facing, for example:
+
+ - Adding new primitive tactics
+ - A new term
+ - Fix parsing for terms
 
 ### Parser
 ### Prover

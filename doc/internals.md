@@ -130,5 +130,5 @@ facing, for example:
 ### Prover
 ### Gluing it all together
 
-[manual]: TODO
+[manual]: http://www.smlnj.org/doc/CM/new.pdf
 [abt]: http://www.github.com/jonsterling/sml-abt

@@ -97,9 +97,9 @@ don't have to deal with scoping issues. However, the internal
 representation avoids using *all* globally unique identifiers so
 it's not super inefficient.
 
-We further use an utility module to get `subst`, `subst1`, and several
-other convenient operators across terms for free. You should read the
-signatures in sml-abt for a full listing.
+We further use an utility module to get `subst`, `freeVariables`, and
+several other convenient operators across terms for free. You should
+read the signatures in sml-abt for a full listing.
 
 Aside from these three main data types, there are a few more
 structures in `syntax/` to be aware of.
@@ -130,7 +130,7 @@ facing, for example:
 
 TODO
 
-### Prover
+### Refiner
 
 TODO
 
@@ -139,7 +139,7 @@ TODO
 JonPRL has relatively few "glue" modules built on top of
 everything. There are only 4. Two of them are "eval" modules. They
 take the ASTs for tactics and developments and translate them into the
-appropriate notions for use in the `prover` section. For example, in
+appropriate notions for use in the `refiner` section. For example, in
 `development_ast_eval.sml` there is one exported function
 
 ``` sml
@@ -173,7 +173,7 @@ AST representing one) we need to convert `tac : Tactic.t` into a
 tactic as described by `CTT.tactic`. To do this we use
 `tactic_eval.sml` which behaves similarly to the code we're looking
 at. It's just a matter of mapping an AST into the appropriate function
-defined in `prover/ctt.fun`.
+defined in `refiner/refiner.fun`.
 
 In both of these evaluation files almost no computation occurs but
 they will always need to be modified if you change something in their
@@ -182,7 +182,7 @@ respective ASTs, for example
  - Adding a new tactic
  - Renaming components of the development AST
 
-The other two files are `ctt_frontend.sml` and `main.sml`. These are
+The other two files are `frontend.sml` and `main.sml`. These are
 really the top level files of JonPRL and are specifically the bits
 that deal with reading the command line arguments, reading the
 appropriate files, and kicking off the whole process. `main.sml` is
